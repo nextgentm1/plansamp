@@ -1,0 +1,75 @@
+
+{
+    "Version": "1.0",
+    "Name": "Planning Sample",
+    "Files":
+    [
+        "/data_load/*",
+        "/users.csv"
+    ],
+    "Ignore": 
+    [
+        "!Processes('}plan_export_attributes_data')",
+        "!Processes('}plan_export_attributes_defs')",
+        "!Processes('}plan_import_attributes_data')",
+        "!Processes('}plan_import_attributes_defs')"
+    ],
+    "Deployment":
+    {
+        "dev":
+        {
+            "Tasks":
+            {
+                "DownloadAttributes":
+                {
+                    "Process": "Processes('plan_sync_attributes')",
+                    "Parameters": [ { "Name": "op", "Value": "1" } ]
+                },
+                "UploadAttributes":
+                {
+                    "Process": "Processes('plan_sync_attributes')",
+                    "Parameters": [ { "Name": "op", "Value": "0" } ]
+                },
+                "LoadUsers":
+                {
+                    "Process": "Processes('plan_refresh_users')"
+                }
+            },
+            "PostPull":
+            [ 
+                "Tasks('LoadUsers')",
+                "Tasks('DownloadAttributes')"
+            ],
+            "PrePush":
+            [ 
+                "Tasks('UploadAttributes')"
+            ]
+        },
+        "prod":
+        {
+            "Tasks":
+            {
+                "LoadData":
+                {
+                    "Chore": "Chores('plan_load_data')"
+                },
+                "LoadAttributes":
+                {
+                    "Process": "Processes('plan_sync_attributes')",
+                    "Parameters": [ { "Name": "op", "Value": "1" } ]
+                },
+                "LoadUsers":
+                {
+                    "Process": "Processes('plan_refresh_users')",
+                    "Precondition": "(NOT Exists('users.csv')) or HasChanged('users.csv')"
+                }
+            },
+            "PostPull":
+            [ 
+                "Tasks('LoadUsers')",
+                "Tasks('LoadAttributes')",
+                "Tasks('LoadData')"
+            ]
+        }
+    }
+}
