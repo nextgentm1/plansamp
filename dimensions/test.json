@@ -1,0 +1,6 @@
+{
+	"@type":"Dimension",
+	"Name": "test",
+	"Hierarchies":[],
+	"DefaultHierarchy":null
+}
